@@ -97,13 +97,37 @@ public class AdminUI extends JFrame {
             }
         });
 
+        // TODO: not finish loadTestData button
         /* After clicking these button, append to the current linked list.
          * Display all book record in the table. Clear the text field.
          */
         btnLoadTestData.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                Book HTMLBook = new Book("HTML How to Program", "0131450913");
+                Book CplusplusBook = new Book("C++ How to Program", "0131857576");
+                Book JavaBook = new Book("Java How to Program", "0132222205");
 
+                if (ifContains(HTMLBook)) {
+                    JOptionPane.showMessageDialog(new AdminUI(),
+                            "Error: book is in current database",
+                            "Message", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    bookList.addLast(HTMLBook);
+                }
+
+                if (ifContains(CplusplusBook)) {
+                    JOptionPane.showMessageDialog(new AdminUI(),
+                            "",
+                            "Message", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    bookList.addLast(CplusplusBook);
+                }
+
+                if (ifContains(JavaBook)) {
+                    JOptionPane.showMessageDialog(new AdminUI(),
+                            "", "Message", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
@@ -140,7 +164,13 @@ public class AdminUI extends JFrame {
         btnDelete.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if(bookList.size == 0 || ifContains(txtISBN.getText())){
 
+
+                }
+                else {
+
+                }
             }
         });
 
@@ -196,9 +226,68 @@ public class AdminUI extends JFrame {
         btnMore.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                Book book = new Book();
+                BookControlUI bookAction = new BookControlUI(book);
+                bookAction.setTitle(txtTitle.getText());
+                bookAction.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                bookAction.setSize(600, 500);
+                bookAction.setVisible(true);
             }
         });
+    }
+
+    /**
+     * If the bookList contains input ISBN, return true.
+     * Otherwise, return false.
+     */
+    private boolean ifContains(String targetISBN) {
+        boolean ifFind = false;
+        Iterator<Book> iterator = bookList.iterator();
+        Book book;
+        while (iterator.hasNext()) {
+            book = iterator.next();
+            if (book.getISBN().contains(targetISBN)) {
+                ifFind = true;
+                break;
+            }
+        }
+        return ifFind;
+    }
+
+    /**
+     * If the bookList contains input ISBN, return true.
+     * Otherwise, return false.
+     */
+    private boolean ifContains(Book targetBook) {
+        boolean ifFind = false;
+        Iterator<Book> iterator = bookList.iterator();
+        Book sourceBook;
+        while (iterator.hasNext()) {
+            sourceBook = iterator.next();
+            if (sourceBook.getISBN().contains(targetBook.getISBN())) {
+                ifFind = true;
+                break;
+            }
+        }
+        return ifFind;
+    }
+
+    /* Return an error message String
+     * when the bookList contains this record */
+    private String setContainError(Book book) {
+        StringBuilder strErrorMessage = new StringBuilder("Error: ");
+        strErrorMessage.append("the database already contains this book");
+        strErrorMessage.append(book.getISBN());
+        return strErrorMessage.toString();
+    }
+
+    /* Return an error message String
+     * when the bookList does not contains this record */
+    private String strNotContainError(Book book) {
+        StringBuilder strErrorMessage = new StringBuilder("Error: ");
+        strErrorMessage.append("the database does not contain this book ");
+        strErrorMessage.append(book.getISBN());
+        return strErrorMessage.toString();
     }
 
     public static void main(String[] args) {

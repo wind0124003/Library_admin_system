@@ -21,6 +21,8 @@ public class BookControlUI extends JFrame {
         this.available = book.isAvailable();
         this.waitingQueue = book.getReservedQueue();
 
+        bookInfo = setBookInfo();
+
         /* Declaring GUI component */
         JTextArea txaBookInfo = new JTextArea(bookInfo, 8, 30);
         JButton btnBorrow = new JButton("Borrow");
@@ -93,7 +95,21 @@ public class BookControlUI extends JFrame {
         btnBorrow.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                available = false;
+                bookInfo = setBookInfo();
+                txaBookInfo.setText(bookInfo);
+                txaSystemMessage.setText("The book is borrowed.");
+                if (available) {
+                    btnBorrow.setEnabled(true);
+                    btnReserve.setEnabled(false);
+                    btnReturn.setEnabled(false);
+                    btnWaitQueue.setEnabled(false);
+                } else {
+                    btnBorrow.setEnabled(false);
+                    btnReserve.setEnabled(true);
+                    btnReturn.setEnabled(true);
+                    btnWaitQueue.setEnabled(true);
+                }
             }
         });
 
@@ -106,7 +122,31 @@ public class BookControlUI extends JFrame {
         btnReturn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                String name = "";
+                bookInfo = setBookInfo();
+                txaBookInfo.setText(bookInfo);
 
+                if (waitingQueue.getSize() == 0) {
+                    available = true;
+                } else {
+                    available = false;
+                    name = waitingQueue.dequeue();
+                }
+
+                if (available) {
+                    btnBorrow.setEnabled(true);
+                    btnReserve.setEnabled(false);
+                    btnReturn.setEnabled(false);
+                    btnWaitQueue.setEnabled(false);
+                    txaSystemMessage.setText("The book is returned.");
+                } else {
+                    btnBorrow.setEnabled(false);
+                    btnReserve.setEnabled(true);
+                    btnReturn.setEnabled(true);
+                    btnWaitQueue.setEnabled(true);
+                    txaSystemMessage.setText("The book is returned.\n" +
+                            "The book is now borrowed by " + name + ".");
+                }
             }
         });
 
@@ -127,7 +167,18 @@ public class BookControlUI extends JFrame {
         btnWaitQueue.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                StringBuilder strQueue = new StringBuilder("The waiting queue:\n");
+                MyQueue<String> queue = waitingQueue;
+                if (queue.getSize() == 0)
+                {
+                    strQueue = new StringBuilder("No people waiting for this book.");
+                }
+                else {
+                    while (queue.getSize() != 0) {
+                        strQueue.append(queue.dequeue() + "\n");
+                    }
+                }
+                txaSystemMessage.setText(strQueue.toString());
             }
         });
     }
@@ -141,6 +192,12 @@ public class BookControlUI extends JFrame {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(600, 500);
         frame.setVisible(true);
+    }
+
+    private String setBookInfo() {
+        String bookInfo = "ISBN : " + ISBN + "\nTitle : " + Title +
+                "\nAvailable : " + available;
+        return bookInfo;
     }
 
 }
