@@ -17,16 +17,19 @@ public class Book {
     }
 
     /** Constructor with title, isbn, available */
-    public Book(String title, String ISBN, boolean available,MyQueue<String> waitingQueue) {
+    public Book(String title, String ISBN, boolean available, MyQueue<String> waitingQueue) {
         this.title = title;
         this.ISBN = ISBN;
         this.available = available;
+        this.reservedQueue = waitingQueue;
     }
 
     /** Constructor with title, ISBN */
     public Book(String title, String ISBN) {
         this.title = title;
         this.ISBN = ISBN;
+        this.reservedQueue = new MyQueue<>();
+        this.available = true;
     }
 
     /** Get the book title */
@@ -62,6 +65,11 @@ public class Book {
     /** Get the reserved queue of the book */
     public MyQueue<String> getReservedQueue () {
         return reservedQueue;
+    }
+
+    /** Set the reserved queue of the book */
+    public void setReservedQueue(MyQueue<String> queue) {
+        reservedQueue = queue;
     }
 
 }

@@ -13,6 +13,7 @@ public class MyLinkedList<E> implements MyList<E> {
     public MyLinkedList() {
         head = null;
         tail = null;
+        size = 0;
     }
 
     /**
@@ -199,10 +200,10 @@ public class MyLinkedList<E> implements MyList<E> {
     /** Return the element at the specified index */
     public E get(int index) {
         Node<E> current = head;
-        for (int i = 1; i < index; i++) {
+        for (int i = 0; i < index; i++) {
             current = current.next;
         }
-        return current.next.element;
+        return current.element;
     }
 
     @Override

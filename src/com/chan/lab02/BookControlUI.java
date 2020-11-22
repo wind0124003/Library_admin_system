@@ -7,19 +7,13 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import javax.swing.*;
 
-public class BookControlUI extends JFrame {
-    private String ISBN;
-    private String Title;
-    private boolean available;
-    private MyQueue<String> waitingQueue;
+public class BookControlUI extends JDialog {
+    private Book book;
     private String bookInfo;
 
-
-    public BookControlUI(Book book) {
-        this.ISBN = book.getISBN();
-        this.Title = book.getTitle();
-        this.available = book.isAvailable();
-        this.waitingQueue = book.getReservedQueue();
+    public BookControlUI(Book book, JFrame frame) {
+        super(frame, "", true);
+        this.book = book;
 
         bookInfo = setBookInfo();
 
@@ -31,6 +25,7 @@ public class BookControlUI extends JFrame {
         JButton btnWaitQueue = new JButton("Waiting Queue");
         JTextArea txaSystemMessage = new JTextArea(3, 30);
         JPanel pnlButton = new JPanel();
+        JPanel pnlAll = new JPanel();
 
         /* Add the GUI Component into frame */
         pnlButton.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 30));
@@ -39,15 +34,20 @@ public class BookControlUI extends JFrame {
         pnlButton.add(btnReserve);
         pnlButton.add(btnWaitQueue);
 
-        add(txaBookInfo, BorderLayout.NORTH);
-        add(txaSystemMessage, BorderLayout.SOUTH);
-        add(pnlButton, BorderLayout.CENTER);
+        pnlAll.setLayout(new BorderLayout());
+        pnlAll.add(txaBookInfo, BorderLayout.NORTH);
+        pnlAll.add(txaSystemMessage, BorderLayout.SOUTH);
+        pnlAll.add(pnlButton, BorderLayout.CENTER);
+
+        Container container = getContentPane();
+        container.add(pnlAll);
+
 
         /* When this window is opened, set the status of the component */
         this.addWindowListener(new WindowListener() {
             @Override
             public void windowOpened(WindowEvent e) {
-                if (available) {
+                if (book.isAvailable()) {
                     btnBorrow.setEnabled(true);
                     btnReserve.setEnabled(false);
                     btnReturn.setEnabled(false);
@@ -95,11 +95,11 @@ public class BookControlUI extends JFrame {
         btnBorrow.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                available = false;
+                book.setAvailable(false);
                 bookInfo = setBookInfo();
                 txaBookInfo.setText(bookInfo);
                 txaSystemMessage.setText("The book is borrowed.");
-                if (available) {
+                if (book.isAvailable()) {
                     btnBorrow.setEnabled(true);
                     btnReserve.setEnabled(false);
                     btnReturn.setEnabled(false);
@@ -123,17 +123,20 @@ public class BookControlUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String name = "";
+                MyQueue<String> queue = book.getReservedQueue();
+
+                if (book.getReservedQueue() == null) { // TODO:error nullPointerException
+                    book.setAvailable(true);
+                } else {
+                    book.setAvailable(false);
+                    name = queue.dequeue();
+                    book.setReservedQueue(queue);
+                }
+
                 bookInfo = setBookInfo();
                 txaBookInfo.setText(bookInfo);
 
-                if (waitingQueue.getSize() == 0) {
-                    available = true;
-                } else {
-                    available = false;
-                    name = waitingQueue.dequeue();
-                }
-
-                if (available) {
+                if (book.isAvailable()) {
                     btnBorrow.setEnabled(true);
                     btnReserve.setEnabled(false);
                     btnReturn.setEnabled(false);
@@ -168,12 +171,10 @@ public class BookControlUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 StringBuilder strQueue = new StringBuilder("The waiting queue:\n");
-                MyQueue<String> queue = waitingQueue;
-                if (queue.getSize() == 0)
-                {
+                MyQueue<String> queue = book.getReservedQueue();
+                if (queue == null) {
                     strQueue = new StringBuilder("No people waiting for this book.");
-                }
-                else {
+                } else {
                     while (queue.getSize() != 0) {
                         strQueue.append(queue.dequeue() + "\n");
                     }
@@ -185,18 +186,29 @@ public class BookControlUI extends JFrame {
 
     /* Main method */
     public static void main(String[] args) {
-        Book book = new Book("0131857576", "C++ How to Program", true,
-                new MyQueue<>());
-        BookControlUI frame = new BookControlUI(book);
-        frame.setTitle(frame.Title);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        MyQueue<String> queue = new MyQueue<>();
+        queue.enqueue("Sam");
+        queue.enqueue("Mary");
+        queue.enqueue("Amy");
+
+        Book book = new Book("C++ How to Program","0131857576",
+                false, queue);
+
+        System.out.println(book.getReservedQueue().toString());
+
+        BookControlUI frame = new BookControlUI(book, null);
+        frame.setTitle(book.getTitle());
+        // frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(600, 500);
         frame.setVisible(true);
+
+
     }
 
     private String setBookInfo() {
-        String bookInfo = "ISBN : " + ISBN + "\nTitle : " + Title +
-                "\nAvailable : " + available;
+        String bookInfo = "ISBN : " + book.getISBN() +
+                "\nTitle : " + book.getTitle() +
+                "\nAvailable : " + book.isAvailable();
         return bookInfo;
     }
 

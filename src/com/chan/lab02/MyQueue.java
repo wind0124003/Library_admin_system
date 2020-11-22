@@ -3,7 +3,11 @@
 package com.chan.lab02;
 
 public class MyQueue<E> {
-    private MyLinkedList<E> list = new MyLinkedList<E>();
+    private MyLinkedList<E> list;
+
+    MyQueue() {
+        list = new MyLinkedList<>();
+    }
 
     public void enqueue(E e) {
         list.addLast(e);

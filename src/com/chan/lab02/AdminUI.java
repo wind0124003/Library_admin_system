@@ -2,15 +2,21 @@
 package com.chan.lab02;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.Date;
 import java.util.Iterator;
 
 public class AdminUI extends JFrame {
     private MyLinkedList<Book> bookList;
-    JFrame frame;
+    private JTextField txtISBN;
+    private JTextField txtTitle;
+    DefaultTableModel model;
 
     public AdminUI() {
         Date dateCreated = new Date();
@@ -31,19 +37,26 @@ public class AdminUI extends JFrame {
         JButton btnDisplayAllByISBN = new JButton("Display All by ISBN");
         JButton btnDisplayAllByTitle = new JButton("Display All by Title");
         JButton btnExit = new JButton("Exit");
-        JTable tblDisplayBook = new JTable();
-        JScrollPane scrDisplayBook = new JScrollPane();
-        JTextField txtISBN = new JTextField(15);
-        JTextField txtTitle = new JTextField(15);
+        txtISBN = new JTextField(15);
+        txtTitle = new JTextField(15);
         JLabel lblISBN = new JLabel("ISBN: ");
         JLabel lblTitle = new JLabel("Title: ");
         JPanel pnlTxtBookRecord = new JPanel();
         JPanel pnlAction = new JPanel();
         JPanel pnlButton01 = new JPanel();
         JPanel pnlButton02 = new JPanel();
+        model = new DefaultTableModel();
 
         /* Set the status of component */
         btnSave.setEnabled(false);
+
+        /* Set table */
+        JTable tblDisplayBook = new JTable(model);
+        model.addColumn("ISBN");
+        model.addColumn("Title");
+        model.addColumn("Available");
+        tblDisplayBook.setRowSelectionAllowed(true);
+        tblDisplayBook.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         /* Add the GUI component into panels*/
         pnlTxtBookRecord.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 20));
@@ -51,7 +64,8 @@ public class AdminUI extends JFrame {
         pnlTxtBookRecord.add(txtISBN);
         pnlTxtBookRecord.add(lblTitle);
         pnlTxtBookRecord.add(txtTitle);
-        pnlButton01.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 15));
+        pnlButton01.setLayout(new FlowLayout(FlowLayout.CENTER, 10,
+                15));
         pnlButton01.add(btnAdd);
         pnlButton01.add(btnEdit);
         pnlButton01.add(btnSave);
@@ -70,10 +84,9 @@ public class AdminUI extends JFrame {
         pnlAction.add(pnlButton02);
 
         /* Add the GUI component into this UI page*/
-        scrDisplayBook.add(tblDisplayBook);
-        add(scrDisplayBook, BorderLayout.CENTER);
-        add(txtDisplayAdmin, BorderLayout.NORTH);
         add(pnlAction, BorderLayout.SOUTH);
+        add(new JScrollPane(tblDisplayBook), BorderLayout.CENTER);
+        add(txtDisplayAdmin, BorderLayout.NORTH);
 
         /* After clicking this button, exit the program */
         btnExit.addActionListener(new ActionListener() {
@@ -110,7 +123,7 @@ public class AdminUI extends JFrame {
 
                 if (ifContains(HTMLBook)) {
                     JOptionPane.showMessageDialog(new AdminUI(),
-                            "Error: book is in current database",
+                            setContainError(HTMLBook),
                             "Message", JOptionPane.ERROR_MESSAGE);
                 } else {
                     bookList.addLast(HTMLBook);
@@ -118,7 +131,7 @@ public class AdminUI extends JFrame {
 
                 if (ifContains(CplusplusBook)) {
                     JOptionPane.showMessageDialog(new AdminUI(),
-                            "",
+                            setContainError(CplusplusBook),
                             "Message", JOptionPane.ERROR_MESSAGE);
                 } else {
                     bookList.addLast(CplusplusBook);
@@ -126,8 +139,11 @@ public class AdminUI extends JFrame {
 
                 if (ifContains(JavaBook)) {
                     JOptionPane.showMessageDialog(new AdminUI(),
-                            "", "Message", JOptionPane.ERROR_MESSAGE);
+                            setContainError(JavaBook), "Message", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    bookList.addLast(JavaBook);
                 }
+                showDataFromList(bookList);
             }
         });
 
@@ -164,13 +180,13 @@ public class AdminUI extends JFrame {
         btnDelete.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(bookList.size == 0 || ifContains(txtISBN.getText())){
-
-
-                }
-                else {
-
-                }
+//                if(bookList.size == 0 || ifContains(txtISBN.getText())){
+//
+//
+//                }
+//                else {
+//
+//                }
             }
         });
 
@@ -227,13 +243,57 @@ public class AdminUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Book book = new Book();
-                BookControlUI bookAction = new BookControlUI(book);
+                BookControlUI bookAction = new BookControlUI(book,new AdminUI());
                 bookAction.setTitle(txtTitle.getText());
-                bookAction.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 bookAction.setSize(600, 500);
                 bookAction.setVisible(true);
             }
         });
+
+        /* After selcting a row on the table, get ISBN and title of this row
+         * show them in the text field
+         */
+        tblDisplayBook.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int rowSelected = tblDisplayBook.getSelectedRow();
+                TableModel tblModel = tblDisplayBook.getModel();
+                txtISBN.setText(tblModel.getValueAt(rowSelected,
+                        0).toString());
+                txtTitle.setText(tblModel.getValueAt(rowSelected,
+                        1).toString());
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
+    }
+    /* Get data from bookList and show this data in the table */
+    public void showDataFromList(MyLinkedList<Book> list) {
+        model.setRowCount(0);
+        for (int i = 0; i < list.size; i++) {
+            Book book = list.get(i);
+            model.addRow(new Object[]{
+                    book.getISBN(), book.getTitle(), book.isAvailable()
+            });
+        }
     }
 
     /**
@@ -276,8 +336,8 @@ public class AdminUI extends JFrame {
      * when the bookList contains this record */
     private String setContainError(Book book) {
         StringBuilder strErrorMessage = new StringBuilder("Error: ");
-        strErrorMessage.append("the database already contains this book");
-        strErrorMessage.append(book.getISBN());
+        strErrorMessage.append("the database already contains this book\n");
+        strErrorMessage.append("(ISBN: " + book.getISBN() + ")");
         return strErrorMessage.toString();
     }
 
@@ -286,9 +346,10 @@ public class AdminUI extends JFrame {
     private String strNotContainError(Book book) {
         StringBuilder strErrorMessage = new StringBuilder("Error: ");
         strErrorMessage.append("the database does not contain this book ");
-        strErrorMessage.append(book.getISBN());
+        strErrorMessage.append("(ISBN: " + book.getISBN() + ")");
         return strErrorMessage.toString();
     }
+
 
     public static void main(String[] args) {
         AdminUI frame = new AdminUI();
