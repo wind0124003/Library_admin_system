@@ -125,7 +125,7 @@ public class BookControlUI extends JDialog {
                 String name = "";
                 MyQueue<String> queue = book.getReservedQueue();
 
-                if (book.getReservedQueue() == null) { // TODO:error nullPointerException
+                if (queue == null) { // TODO:error nullPointerException
                     book.setAvailable(true);
                 } else {
                     book.setAvailable(false);

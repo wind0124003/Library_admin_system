@@ -17,17 +17,19 @@ public class Book {
     }
 
     /** Constructor with title, isbn, available */
-    public Book(String title, String ISBN, boolean available, MyQueue<String> waitingQueue) {
+    public Book(String ISBN, String title, boolean available, MyQueue<String> waitingQueue) {
         this.title = title;
         this.ISBN = ISBN;
         this.available = available;
         this.reservedQueue = waitingQueue;
     }
 
-    /** Constructor with title, ISBN */
-    public Book(String title, String ISBN) {
-        this.title = title;
+    /** Constructor with title, ISBN
+     * @param ISBN
+     * @param title*/
+    public Book(String ISBN, String title) {
         this.ISBN = ISBN;
+        this.title = title;
         this.reservedQueue = new MyQueue<>();
         this.available = true;
     }
