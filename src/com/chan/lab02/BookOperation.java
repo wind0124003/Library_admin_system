@@ -6,5 +6,5 @@ public interface BookOperation<E> {
         return list;
     }
 
-    public MyLinkedList<E> removeBook(E e, MyLinkedList<E> list);
+    public MyLinkedList<E> removeBook(String string, MyLinkedList<E> list);
 }

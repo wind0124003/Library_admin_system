@@ -9,8 +9,13 @@ import java.awt.event.*;
 import java.util.Date;
 
 public class AdminUI extends JFrame {
-    private MyLinkedList<Book> bookList; // linked list to store book (database)
-    private MyLinkedList<Book> tempList; // store bookList temporarily for edit and save operation
+    // linked list to store book (database)
+    // for all operation, except for search and display
+    private MyLinkedList<Book> bookList;
+    // store list temporarily for edit and save operation, delete, search, ordering
+    private MyLinkedList<Book> tempList;
+    // store adding order of node
+    private MyLinkedList<Book> addNodeList;
     private final JTextField txtISBN; // text field of ISBN
     private final JTextField txtTitle; // text field of title
     private final AdminOperation operation = new AdminOperation();
@@ -24,6 +29,7 @@ public class AdminUI extends JFrame {
         clickTitleTime = 0;
         Date dateCreated = new Date();
         bookList = new MyLinkedList<>();
+        addNodeList = new MyLinkedList<>();
 
         /* Declare GUI component */
         JTextArea txaDisplayAdmin = new JTextArea(
@@ -115,6 +121,7 @@ public class AdminUI extends JFrame {
                 );
             } else {
                 bookList = operation.addBook(new Book(ISBN, title), bookList); // update the linked list
+                addNodeList = operation.addBook(new Book(ISBN,title),addNodeList);
                 showDataFromList(bookList); // display all record in the table
                 clearTextField(); // clear text field
             }
@@ -137,6 +144,7 @@ public class AdminUI extends JFrame {
                     showErrorMessage(errorMessage, "Message");
                 } else {
                     bookList.addLast(HTMLBook);
+                    addNodeList.addLast(HTMLBook);
                 }
 
                 if (operation.checkIfContains(CplusplusBook, bookList) == true) {
@@ -144,6 +152,7 @@ public class AdminUI extends JFrame {
                     showErrorMessage(errorMessage, "Message");
                 } else {
                     bookList.addLast(CplusplusBook);
+                    addNodeList.addLast(CplusplusBook);
                 }
 
                 if (operation.checkIfContains(JavaBook, bookList) == true) {
@@ -151,6 +160,7 @@ public class AdminUI extends JFrame {
                     showErrorMessage(errorMessage, "Message");
                 } else {
                     bookList.addLast(JavaBook);
+                    addNodeList.addLast(JavaBook);
                 }
 
                 showDataFromList(bookList);
@@ -167,11 +177,11 @@ public class AdminUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 strISBN = txtISBN.getText();
-                if (bookList.size == 0) {
-                    showErrorMessage("The database is empty", "Error");
-                } else if (strISBN.isEmpty()) {
+                if (strISBN.isEmpty()) {
                     String errorMessage = "The text field is empty.";
                     showErrorMessage(errorMessage, "Error");
+                } else if (bookList.size == 0) {
+                    showErrorMessage("The database is empty", "Error");
                 } else if (operation.checkIfContains(strISBN, bookList) == false) {
                     String errorMessage = operation.returnStrNotContainError(strISBN);
                     showErrorMessage(errorMessage, "Error");
@@ -196,6 +206,7 @@ public class AdminUI extends JFrame {
                     btnExit.setEnabled(false);
                     tempList = bookList;
                 }
+
                 resetClickingTime();
             }
         });
@@ -206,6 +217,8 @@ public class AdminUI extends JFrame {
          * Display updated record in the table. Clear the text field.
          */
         btnSave.addActionListener(new ActionListener() {
+            // TODO find a bug- cannot save probably
+            //  recreation: follow the demo guiding sheet
             @Override
             public void actionPerformed(ActionEvent e) {
                 String oldISBN = strISBN;
@@ -216,13 +229,14 @@ public class AdminUI extends JFrame {
                     showErrorMessage("The ISBN does not changed", "Message");
                 }
                 // Check if the linked list does not contains the ISBN
-                else if (operation.checkIfContains(newISBN, bookList) == false) {
-                    String errorMessage = operation.returnStrNotContainError(newISBN);
+                else if (operation.checkIfContains(newISBN, bookList) == true) {
+                    String errorMessage = operation.returnStrContainError(newISBN);
                     showErrorMessage(errorMessage, "Error");
                 } else {
-                    // TODO save the record, 23/11
                     tempList = operation.saveBook(oldISBN, newISBN, newTitle, bookList);
                     bookList = tempList;
+                    tempList = operation.saveBook(oldISBN,newISBN,newTitle,addNodeList);
+                    addNodeList = bookList;
                     showDataFromList(bookList); // display data from list
                     clearTextField(); // clear the text field
 
@@ -253,25 +267,25 @@ public class AdminUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 strISBN = txtISBN.getText();
                 String errorMessage;
-                // check if linked list is empty
-                if (bookList.size == 0) {
-                    errorMessage = "The database does not contain any record";
+                // check if ISBN text field is empty
+                if (strISBN.isEmpty()) {
+                    errorMessage = "The text field is empty";
                     showErrorMessage(errorMessage, "Error");
                 }
-                // check if ISBN text field is empty
-                else if (strISBN.isEmpty()) {
-                    errorMessage = "The text field is empty";
+                // check if linked list is empty
+                else if (bookList.size == 0) {
+                    errorMessage = "The database does not contain any record";
                     showErrorMessage(errorMessage, "Error");
                 }
                 // check if linked list does not contain input ISBN
                 else if (operation.checkIfContains(strISBN, bookList) == false) {
                     errorMessage = operation.returnStrNotContainError(strISBN);
                     showErrorMessage(errorMessage, "Error");
-                }
-                // TODO delete the record, 23/11
-                else {
+                } else {
                     tempList = operation.removeBook(strISBN, bookList);
                     bookList = tempList;
+                   // tempList = operation.removeBook(strISBN,addNodeList);
+                   // addNodeList = tempList;
                     showDataFromList(bookList);
                     clearTextField();
                 }
@@ -289,7 +303,6 @@ public class AdminUI extends JFrame {
                 String strISBN = txtISBN.getText();
                 String strTitle = txtTitle.getText();
 
-                // TODO search the given data in the linked list
                 if ((strISBN.isEmpty() == false) || (strTitle.isEmpty() == false)) {
                     tempList = operation.searchBook(strISBN, strTitle, bookList);
                     showDataFromList(tempList);
@@ -301,8 +314,10 @@ public class AdminUI extends JFrame {
         /* After clicking this button, display all book record in
          * order of adding nodes to the bookList
          */
-        btnDisplayAll.addActionListener(e -> {
-            showDataFromList(bookList);
+        btnDisplayAll.addActionListener(e ->
+
+        {
+            showDataFromList(addNodeList);
             resetClickingTime();
         });
 
@@ -354,7 +369,6 @@ public class AdminUI extends JFrame {
         btnMore.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO get the book by using the ISBN, 23/11
                 String ISBN = txtISBN.getText();
                 String title = txtTitle.getText();
                 // if ISBN text field is empty
@@ -367,15 +381,8 @@ public class AdminUI extends JFrame {
                     String errorMessage = operation.returnStrNotContainError(ISBN);
                     showErrorMessage(errorMessage, "Error");
                 } else {
-                    Book book;
-                    if (title.isEmpty()) {
-                        book = operation.getBook(ISBN, bookList);
-                    } else {
-                        book = new Book(ISBN, title);
-                    }
-                    BookControlUI bookAction = new BookControlUI(book, new AdminUI());
-                    bookAction.setTitle(txtTitle.getText());
-                    bookAction.setSize(600, 500);
+                    Book book = operation.getBook(ISBN, bookList); // Get the book by using ISBN
+                    BookControlUI bookAction = new BookControlUI(book, new AdminUI()); // open a window
                     bookAction.setVisible(true);
                 }
                 resetClickingTime();
@@ -451,6 +458,7 @@ public class AdminUI extends JFrame {
         frame.setVisible(true);
     }
 
+
     public class BookControlUI extends JDialog {
         private Book book;
         private String bookInfo;
@@ -462,7 +470,7 @@ public class AdminUI extends JFrame {
         private final JTextArea txaSystemMessage;
 
         public BookControlUI(Book passBook, JFrame frame) {
-            super(frame, "", true);
+            super(frame, passBook.getTitle(), true);
             this.book = passBook;
             bookInfo = operation.returnStrBookInfo(book);
 
@@ -490,8 +498,10 @@ public class AdminUI extends JFrame {
 
             Container container = getContentPane();
             container.add(pnlAll);
+            this.setSize(600, 500);
 
             /* When this window is opened, set the status of the component */
+            /* When this window is closing, save the status of the book */
             this.addWindowListener(new WindowListener() {
                 @Override
                 public void windowOpened(WindowEvent e) {
@@ -504,12 +514,14 @@ public class AdminUI extends JFrame {
 
                 @Override
                 public void windowClosing(WindowEvent e) {
-
+                    bookList = operation.saveBook(book, bookList);
+                    showDataFromList(bookList);
+                    addNodeList = operation.saveBook(book,addNodeList);
                 }
 
                 @Override
                 public void windowClosed(WindowEvent e) {
-                    // TODO it should store modified book into the linked list
+
 
                 }
 
@@ -549,19 +561,23 @@ public class AdminUI extends JFrame {
             btnReturn.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    Book tempBook = book;
-                    book = operation.returnBook(tempBook);
-                    bookInfo = operation.returnStrBookInfo(book);
-                    txaBookInfo.setText(bookInfo);
-
-                    if (book.isAvailable()) {
+                    MyQueue<String> queue = book.getReservedQueue();
+                    String name;
+                    if (queue.getSize() == 0) {
+                        book.setAvailable(true);
                         setButtonAvailable();
                         setSystemMessage("The book is returned.");
                     } else {
+                        book.setAvailable(false);
+                        name = operation.returnBook(book);
+//                        name = queue.dequeue();
+//                        book.setReservedQueue(queue);
                         setButtonNotAvailable();
                         setSystemMessage("The book is returned.\n" +
-                                "The book is now borrowed by " + "" + ".");
+                                "The book is now borrowed by " + name + ".");
                     }
+                    bookInfo = operation.returnStrBookInfo(book);
+                    txaBookInfo.setText(bookInfo);
                 }
             });
 
@@ -573,7 +589,10 @@ public class AdminUI extends JFrame {
             btnReserve.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-
+                    String name = JOptionPane.showInputDialog(null, "What is your name?", "Input",
+                            JOptionPane.QUESTION_MESSAGE);
+                    operation.reserveBook(book, name);
+                    setSystemMessage("The book is reserved by " + name);
                 }
             });
 
@@ -581,8 +600,22 @@ public class AdminUI extends JFrame {
             btnWaitQueue.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    String strQueue = operation.returnWaitingQueue(book);
-                    setSystemMessage(strQueue);
+                    StringBuilder strQueue = new StringBuilder("The waiting queue:\n");
+                    Book tempBook = book;
+                    MyQueue<String> newQueue = new MyQueue<>();
+
+                    MyQueue<String> reservedQueue = tempBook.getReservedQueue();
+                    if (reservedQueue.getSize() == 0) {
+                        strQueue = new StringBuilder("No people waiting for this book.");
+                    } else {
+                        while (reservedQueue.getSize() != 0) {
+                            String name = reservedQueue.dequeue();
+                            newQueue.enqueue(name);
+                            strQueue.append(name + "\n");
+                        }
+                    }
+                    book.setReservedQueue(newQueue);
+                    setSystemMessage(strQueue.toString());
                 }
             });
         }

@@ -3,6 +3,7 @@
 package com.chan.lab02;
 //import MyLinkedList.Node;
 
+
 public class MyLinkedList<E> implements MyList<E> {
     protected Node<E> head, tail;
     protected int size = 0; // Number of elements in the list
@@ -173,7 +174,7 @@ public class MyLinkedList<E> implements MyList<E> {
     /** Clear the list */
     public void clear() {
         Node<E> current = head;
-        while(current != null) {
+        while (current != null) {
             current = current.next;
             removeFirst();
         }
@@ -251,7 +252,7 @@ public class MyLinkedList<E> implements MyList<E> {
                 }
             }
         }
-        return lastIndex+1;
+        return lastIndex + 1;
     }
 
     @Override

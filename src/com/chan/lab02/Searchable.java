@@ -27,15 +27,13 @@ public interface Searchable {
             book = value;
             try {
                 matchFound = setFindCondition(pat1, pat2, book);
-            }
-            catch (PatternSyntaxException e){
+            } catch (PatternSyntaxException e) {
                 System.out.println("PatternSyntaxException: ");
-                System.out.println("Description: "+ e.getDescription());
-                System.out.println("Index: "+ e.getIndex());
-                System.out.println("Message: "+ e.getMessage());
-                System.out.println("Pattern: "+ e.getPattern());
-            }
-            finally {
+                System.out.println("Description: " + e.getDescription());
+                System.out.println("Index: " + e.getIndex());
+                System.out.println("Message: " + e.getMessage());
+                System.out.println("Pattern: " + e.getPattern());
+            } finally {
                 if (matchFound) {
                     tempList.addLast(book);
                 }

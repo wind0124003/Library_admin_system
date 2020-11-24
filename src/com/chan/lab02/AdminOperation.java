@@ -12,18 +12,9 @@ public class AdminOperation implements BookOperation<Book>, UserOperation<Book> 
         return list;
     }
 
-    /**
-     * Remove a book from the given list
-     */
-    @Override
-    public MyLinkedList<Book> removeBook(Book book, MyLinkedList<Book> list) {
-        MyLinkedList<Book> tempList = list; // 23/11 TODO: remove the book function
-        return tempList;
-    }
-
     public MyLinkedList<Book> removeBook(String ISBN, MyLinkedList<Book> list) {
-        MyLinkedList<Book> tempList = list; //23/11 TODO: remove the book function
-        Book book = getBook(ISBN,tempList);
+        MyLinkedList<Book> tempList = list;
+        Book book = getBook(ISBN, tempList);
         int index = tempList.indexOf(book);
         System.out.println(index);
         tempList.remove(index);
@@ -36,31 +27,40 @@ public class AdminOperation implements BookOperation<Book>, UserOperation<Book> 
         if ((ISBN.isEmpty() == false) && (title.isEmpty() == false)) { // ISBN text field and title text field is not empty
             Searchable searchISBNTitle = new SearchISBNTitle();
             tempList = searchISBNTitle.search(ISBN, title, tempList);
-        }
-        else if ((ISBN.isEmpty() == false) && (title.isEmpty() == true)) { // ISBN text field is not empty
+        } else if ((ISBN.isEmpty() == false) && (title.isEmpty() == true)) { // ISBN text field is not empty
             Searchable searchISBN = new SearchISBN();
             tempList = searchISBN.search(ISBN, tempList);
-        }
-        else if ((ISBN.isEmpty() == true) && (title.isEmpty() == false)) { // title text field is not empty
+        } else if ((ISBN.isEmpty() == true) && (title.isEmpty() == false)) { // title text field is not empty
             Searchable searchTitle = new SearchTitle();
             tempList = searchTitle.search(title, tempList);
         }
 
-        return tempList; //23/11 TODO: searchBook
-    }
-
-    // 23/11 TODO: saveBook
-    public MyLinkedList<Book> saveBook(String ISBN, String newISBN, String newTitle,
-                                       MyLinkedList<Book> list) {
-        MyLinkedList<Book> tempList = list;
         return tempList;
     }
 
-    //23/11 TODO: getBook
+    public MyLinkedList<Book> saveBook(String ISBN, String newISBN, String newTitle,
+                                       MyLinkedList<Book> list) {
+        MyLinkedList<Book> tempList = list;
+        Book book = getBook(ISBN, tempList);
+        int index = tempList.indexOf(book);
+        book.setTitle(newTitle);
+        book.setISBN(newISBN);
+        tempList.set(index, book);
+        return tempList;
+    }
+
+    public MyLinkedList<Book> saveBook(Book book, MyLinkedList<Book> list){
+        Book tempBook = getBook(book.getISBN(),list);
+        int index = list.indexOf(tempBook);
+        list.set(index,book);
+        return list;
+    }
+
+
     public Book getBook(String ISBN, MyLinkedList<Book> list) {
         Book findBook = null;
-        for (Book book : list){
-            if(book.getISBN().equals(ISBN)){
+        for (Book book : list) {
+            if (book.getISBN().equals(ISBN)) {
                 findBook = book;
             }
         }
@@ -200,39 +200,55 @@ public class AdminOperation implements BookOperation<Book>, UserOperation<Book> 
      * Get the name of dequeued item.
      */
     @Override
-    public Book returnBook(Book book) {
+    public String returnBook(Book book) {
+        String name = "";
         MyQueue<String> queue = book.getReservedQueue();
-        if (queue == null) {
+        if (queue.getSize() == 0) {
             book.setAvailable(true);
         } else {
             book.setAvailable(false);
-            queue.dequeue();
+            name = queue.dequeue();
             book.setReservedQueue(queue);
         }
-        return book;
+        return name;
     }
-
 
     @Override
-    public Book reserveBook(Book book) {
-        return null;
+    public Book reserveBook(Book book, String name) {
+        Book newBook = book;
+        MyQueue<String> newQueue = newBook.getReservedQueue();
+        newQueue.enqueue(name);
+        newBook.setReservedQueue(newQueue);
+//        System.out.println(newQueue);
+        return newBook;
     }
 
-    /**
-     * Return the string of waiting queue of the given book
-     */
-    public String returnWaitingQueue(Book book) {
-        StringBuilder strQueue = new StringBuilder("The waiting queue:\n");
-        MyQueue<String> queue = book.getReservedQueue();
-        if (queue == null) {
-            strQueue = new StringBuilder("No people waiting for this book.");
-        } else {
-            while (queue.getSize() != 0) {
-                strQueue.append(queue.dequeue() + "\n");
-            }
-        }
-        return strQueue.toString();
-    }
-
-
+//
+//    /**
+//     * Return the string of waiting queue of the given book
+//     */
+//    public String returnWaitingQueue(Book book) {
+//        StringBuilder strQueue = new StringBuilder("The waiting queue:\n");
+//        Book tempBook = book;
+//        MyQueue<String> newQueue = new MyQueue<>();
+//        Book newBook = new Book();
+//        newBook.setISBN(tempBook.getISBN());
+//        newBook.setTitle(tempBook.getTitle());
+//        newBook.setAvailable(tempBook.isAvailable());
+//        // newBook.setReservedQueue(tempBook.getReservedQueue());
+//
+//        MyQueue<String> reservedQueue = tempBook.getReservedQueue();
+//        if (reservedQueue == null) {
+//            strQueue = new StringBuilder("No people waiting for this book.");
+//        } else {
+//            while (reservedQueue.getSize() != 0) {
+//                String name = reservedQueue.dequeue();
+//                newQueue.enqueue(name);
+//                strQueue.append(name + "\n");
+//            }
+//        }
+//        newBook.setReservedQueue(newQueue);
+//        book = newBook;
+//        return strQueue.toString();
+//    }
 }
