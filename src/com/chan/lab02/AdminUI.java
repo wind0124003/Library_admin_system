@@ -348,6 +348,7 @@ public class AdminUI extends JFrame {
                     }
                     clickISBNTime++;
                 }
+                clickTitleTime = 0;
             }
         });
 
@@ -368,6 +369,7 @@ public class AdminUI extends JFrame {
                     }
                     clickTitleTime++;
                 }
+                clickISBNTime = 0;
             }
         });
 
