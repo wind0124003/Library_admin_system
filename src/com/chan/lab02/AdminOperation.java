@@ -23,6 +23,11 @@ public class AdminOperation implements BookOperation<Book>, UserOperation<Book> 
 
     public MyLinkedList<Book> removeBook(String ISBN, MyLinkedList<Book> list) {
         MyLinkedList<Book> tempList = list; //23/11 TODO: remove the book function
+        Book book = getBook(ISBN,tempList);
+        int index = tempList.indexOf(book);
+        System.out.println(index);
+        tempList.remove(index);
+        System.out.println(tempList);
         return tempList;
     }
 
@@ -55,7 +60,7 @@ public class AdminOperation implements BookOperation<Book>, UserOperation<Book> 
     public Book getBook(String ISBN, MyLinkedList<Book> list) {
         Book findBook = null;
         for (Book book : list){
-            if(book.getISBN().contains(ISBN)){
+            if(book.getISBN().equals(ISBN)){
                 findBook = book;
             }
         }
