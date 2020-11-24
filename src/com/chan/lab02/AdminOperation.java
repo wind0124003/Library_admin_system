@@ -2,7 +2,7 @@ package com.chan.lab02;
 
 import java.util.Iterator;
 
-public class AdminOperation implements BookOperation<Book>, UserOperation<Book>{
+public class AdminOperation implements BookOperation<Book>, UserOperation<Book> {
     /**
      * Add a book into the given list
      */
@@ -27,18 +27,39 @@ public class AdminOperation implements BookOperation<Book>, UserOperation<Book>{
     }
 
     public MyLinkedList<Book> searchBook(String ISBN, String title, MyLinkedList<Book> list) {
-        return list; //23/11 TODO: searchBook
+        MyLinkedList<Book> tempList = list;
+        if ((ISBN.isEmpty() == false) && (title.isEmpty() == false)) { // ISBN text field and title text field is not empty
+            Searchable searchISBNTitle = new SearchISBNTitle();
+            tempList = searchISBNTitle.search(ISBN, title, tempList);
+        }
+        else if ((ISBN.isEmpty() == false) && (title.isEmpty() == true)) { // ISBN text field is not empty
+            Searchable searchISBN = new SearchISBN();
+            tempList = searchISBN.search(ISBN, tempList);
+        }
+        else if ((ISBN.isEmpty() == true) && (title.isEmpty() == false)) { // title text field is not empty
+            Searchable searchTitle = new SearchTitle();
+            tempList = searchTitle.search(title, tempList);
+        }
+
+        return tempList; //23/11 TODO: searchBook
     }
 
     // 23/11 TODO: saveBook
-    public MyLinkedList<Book> saveBook(String ISBN, String newISBN, String newTitle, MyLinkedList<Book> list) {
+    public MyLinkedList<Book> saveBook(String ISBN, String newISBN, String newTitle,
+                                       MyLinkedList<Book> list) {
         MyLinkedList<Book> tempList = list;
         return tempList;
     }
 
     //23/11 TODO: getBook
     public Book getBook(String ISBN, MyLinkedList<Book> list) {
-        return new Book(ISBN, "");
+        Book findBook = null;
+        for (Book book : list){
+            if(book.getISBN().contains(ISBN)){
+                findBook = book;
+            }
+        }
+        return findBook;
     }
 
     /**
@@ -63,9 +84,9 @@ public class AdminOperation implements BookOperation<Book>, UserOperation<Book>{
      * Sort the given linked list by book ISBN, ascending order
      */
     public MyLinkedList<Book> sortISBNAscending(MyLinkedList<Book> list) {
-       Sortable sortISBN = new SortISBN();
-       MyLinkedList<Book> tempList = sortISBN.sortAscending(list);
-       return tempList;
+        Sortable sortISBN = new SortISBN();
+        MyLinkedList<Book> tempList = sortISBN.sortAscending(list);
+        return tempList;
     }
 
     /**
@@ -86,7 +107,7 @@ public class AdminOperation implements BookOperation<Book>, UserOperation<Book>{
         Book book;
         while (iterator.hasNext()) {
             book = iterator.next();
-            if (book.getISBN().contains(targetISBN)) {
+            if (book.getISBN().equals(targetISBN)) {
                 ifFind = true;
                 break;
             }

@@ -11,11 +11,11 @@ import java.util.Date;
 public class AdminUI extends JFrame {
     private MyLinkedList<Book> bookList; // linked list to store book (database)
     private MyLinkedList<Book> tempList; // store bookList temporarily for edit and save operation
-    private JTextField txtISBN; // text field of ISBN
-    private JTextField txtTitle; // text field of title
-    private AdminOperation operation = new AdminOperation();
+    private final JTextField txtISBN; // text field of ISBN
+    private final JTextField txtTitle; // text field of title
+    private final AdminOperation operation = new AdminOperation();
     private String strISBN; // store the data in ISBN text field
-    private DefaultTableModel model;
+    private final DefaultTableModel model;
     private int clickISBNTime;
     private int clickTitleTime;
 
@@ -92,12 +92,7 @@ public class AdminUI extends JFrame {
         add(txaDisplayAdmin, BorderLayout.NORTH);
 
         /* After clicking this button, exit the program */
-        btnExit.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        });
+        btnExit.addActionListener(e -> System.exit(0));
 
         /* After clicking this button, check if the ISBN text field is empty OR
          * title text field is empty OR ISBN exist in the bookList.
@@ -105,31 +100,25 @@ public class AdminUI extends JFrame {
          * Otherwise, create Book object and add them to the bookList.
          * Display the updated table and clear the text field.
          */
-        btnAdd.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String ISBN = txtISBN.getText();
-                String title = txtTitle.getText();
-                if (ISBN.isEmpty()) { // check if ISBN text field is empty
-                    JOptionPane.showMessageDialog(new AdminUI(),
-                            "The ISBN text field is empty");
-                } else if (title.isEmpty()) { // check if title text field is empty
-                    JOptionPane.showMessageDialog(new AdminUI(),
-                            "The title text field is empty");
-                } else if (operation.checkIfContains(ISBN, bookList) == true) { // check if input ISBN is in the linked list
-                    JOptionPane.showMessageDialog(new AdminUI(),
-                            operation.returnStrContainError(ISBN)
-                    );
-                } else {
-                    bookList = operation.addBook(new Book(ISBN, title), bookList); // update the linked list
-                    showDataFromList(bookList); // display all record in the table
-                    clearTextField(); // clear text field
-                }
-
-                clickISBNTime = 0; // Reset the clicking time of "Display All by ISBN" button
-                clickTitleTime = 0; // Reset the clicking time of "Display all by Title" button
-
+        btnAdd.addActionListener(e -> {
+            String ISBN = txtISBN.getText();
+            String title = txtTitle.getText();
+            if (ISBN.isEmpty()) { // check if ISBN text field is empty
+                JOptionPane.showMessageDialog(new AdminUI(),
+                        "The ISBN text field is empty");
+            } else if (title.isEmpty()) { // check if title text field is empty
+                JOptionPane.showMessageDialog(new AdminUI(),
+                        "The title text field is empty");
+            } else if (operation.checkIfContains(ISBN, bookList) == true) { // check if input ISBN is in the linked list
+                JOptionPane.showMessageDialog(new AdminUI(),
+                        operation.returnStrContainError(ISBN)
+                );
+            } else {
+                bookList = operation.addBook(new Book(ISBN, title), bookList); // update the linked list
+                showDataFromList(bookList); // display all record in the table
+                clearTextField(); // clear text field
             }
+            resetClickingTime();
         });
 
         /* After clicking these button, append to the current linked list.
@@ -144,39 +133,34 @@ public class AdminUI extends JFrame {
 
 //                adminOperation.returnErrorMessage(HTMLBook, AdminOperation.ErrorType.CONTAIN);
                 if (operation.checkIfContains(HTMLBook, bookList) == true) {
-                    JOptionPane.showMessageDialog(new AdminUI(),
-                            operation.returnStrContainError(HTMLBook),
-                            "Message", JOptionPane.ERROR_MESSAGE);
+                    String errorMessage = operation.returnStrContainError(HTMLBook);
+                    showErrorMessage(errorMessage, "Message");
                 } else {
                     bookList.addLast(HTMLBook);
                 }
 
                 if (operation.checkIfContains(CplusplusBook, bookList) == true) {
-                    JOptionPane.showMessageDialog(new AdminUI(),
-                            operation.returnStrContainError(CplusplusBook),
-                            "Message", JOptionPane.ERROR_MESSAGE);
+                    String errorMessage = operation.returnStrContainError(CplusplusBook);
+                    showErrorMessage(errorMessage, "Message");
                 } else {
                     bookList.addLast(CplusplusBook);
                 }
 
                 if (operation.checkIfContains(JavaBook, bookList) == true) {
-                    JOptionPane.showMessageDialog(new AdminUI(),
-                            operation.returnStrContainError(JavaBook),
-                            "Message", JOptionPane.ERROR_MESSAGE);
+                    String errorMessage = operation.returnStrContainError(JavaBook);
+                    showErrorMessage(errorMessage, "Message");
                 } else {
                     bookList.addLast(JavaBook);
                 }
 
                 showDataFromList(bookList);
                 clearTextField();
-                clickISBNTime = 0; // Reset the clicking time of "Display All by ISBN" button
-                clickTitleTime = 0; // Reset the clicking time of "Display all by Title" button
+                resetClickingTime();
             }
         });
 
         /* After clicking this button, check if bookList is empty OR
-         * bookList does not contains the input ISBN.
-         * If yes, display error message.
+         * bookList does not contains the input ISBN. If yes, display error message.
          * Otherwise, "Save" button becomes enabled and other button becomes disabled.
          */
         btnEdit.addActionListener(new ActionListener() {
@@ -185,11 +169,11 @@ public class AdminUI extends JFrame {
                 strISBN = txtISBN.getText();
                 if (bookList.size == 0) {
                     showErrorMessage("The database is empty", "Error");
-                } else if (operation.checkIfContains(strISBN, bookList) == false) {
-                    String errorMessage = operation.returnStrNotContainError(strISBN);
-                    showErrorMessage(errorMessage, "Error");
                 } else if (strISBN.isEmpty()) {
                     String errorMessage = "The text field is empty.";
+                    showErrorMessage(errorMessage, "Error");
+                } else if (operation.checkIfContains(strISBN, bookList) == false) {
+                    String errorMessage = operation.returnStrNotContainError(strISBN);
                     showErrorMessage(errorMessage, "Error");
                 } else {
                     /* get the title */
@@ -212,8 +196,7 @@ public class AdminUI extends JFrame {
                     btnExit.setEnabled(false);
                     tempList = bookList;
                 }
-                clickISBNTime = 0; // Reset the clicking time of "Display All by ISBN" button
-                clickTitleTime = 0; // Reset the clicking time of "Display all by Title" button
+                resetClickingTime();
             }
         });
 
@@ -228,7 +211,7 @@ public class AdminUI extends JFrame {
                 String oldISBN = strISBN;
                 String newISBN = txtISBN.getText();
                 String newTitle = txtTitle.getText();
-// Check if the ISBN text field does not changed
+                // Check if the ISBN text field does not changed
                 if (oldISBN.contains(newISBN)) {
                     showErrorMessage("The ISBN does not changed", "Message");
                 }
@@ -255,10 +238,8 @@ public class AdminUI extends JFrame {
                     btnDisplayAllByISBN.setEnabled(true);
                     btnDisplayAllByTitle.setEnabled(true);
                     btnExit.setEnabled(true);
-
                 }
-                clickISBNTime = 0; // Reset the clicking time of "Display All by ISBN" button
-                clickTitleTime = 0; // Reset the clicking time of "Display all by Title" button
+                resetClickingTime();
             }
         });
 
@@ -294,9 +275,7 @@ public class AdminUI extends JFrame {
                     showDataFromList(bookList);
                     clearTextField();
                 }
-
-                clickISBNTime = 0; // Reset the clicking time of "Display All by ISBN" button
-                clickTitleTime = 0; // Reset the clicking time of "Display all by Title" button
+                resetClickingTime();
             }
         });
 
@@ -311,24 +290,20 @@ public class AdminUI extends JFrame {
                 String strTitle = txtTitle.getText();
 
                 // TODO search the given data in the linked list
-                if (strISBN.isEmpty() && strTitle.isEmpty()) {
+                if ((strISBN.isEmpty() == false) || (strTitle.isEmpty() == false)) {
                     tempList = operation.searchBook(strISBN, strTitle, bookList);
                     showDataFromList(tempList);
                 }
-
-                clickISBNTime = 0; // Reset the clicking time of "Display All by ISBN" button
-                clickTitleTime = 0; // Reset the clicking time of "Display all by Title" button
+                resetClickingTime();
             }
         });
 
         /* After clicking this button, display all book record in
          * order of adding nodes to the bookList
          */
-        btnDisplayAll.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showDataFromList(bookList);
-            }
+        btnDisplayAll.addActionListener(e -> {
+            showDataFromList(bookList);
+            resetClickingTime();
         });
 
         /* After clicking this button, check if the clicking time.
@@ -341,11 +316,10 @@ public class AdminUI extends JFrame {
                 if (model.getRowCount() != 0) {
                     if (clickISBNTime % 2 == 0) { // odd clicking time
                         tempList = operation.sortISBNAscending(bookList);
-                        showDataFromList(tempList);
                     } else { // even click time
                         tempList = operation.sortISBNDescending(bookList);
-                        showDataFromList(tempList);
                     }
+                    showDataFromList(tempList);
                     clickISBNTime++;
                 }
                 clickTitleTime = 0;
@@ -362,11 +336,10 @@ public class AdminUI extends JFrame {
                 if (model.getRowCount() != 0) {
                     if (clickTitleTime % 2 == 0) {
                         tempList = operation.sortTitleAscending(bookList);
-                        showDataFromList(tempList);
                     } else {
                         tempList = operation.sortTitleDescending(bookList);
-                        showDataFromList(tempList);
                     }
+                    showDataFromList(tempList);
                     clickTitleTime++;
                 }
                 clickISBNTime = 0;
@@ -405,11 +378,8 @@ public class AdminUI extends JFrame {
                     bookAction.setSize(600, 500);
                     bookAction.setVisible(true);
                 }
-
-                clickISBNTime = 0; // Reset the clicking time of "Display All by ISBN" button
-                clickTitleTime = 0; // Reset the clicking time of "Display all by Title" button
+                resetClickingTime();
             }
-
         });
 
         /* After selecting a row on the table, get ISBN and title of this row
@@ -428,24 +398,25 @@ public class AdminUI extends JFrame {
 
             @Override
             public void mousePressed(MouseEvent e) {
-
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-
             }
 
             @Override
             public void mouseEntered(MouseEvent e) {
-
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-
             }
         });
+    }
+
+    public void resetClickingTime() {
+        clickISBNTime = 0; // Reset the clicking time of "Display All by ISBN" button
+        clickTitleTime = 0; // Reset the clicking time of "Display all by Title" button
     }
 
     /* Show a error message */
@@ -483,12 +454,12 @@ public class AdminUI extends JFrame {
     public class BookControlUI extends JDialog {
         private Book book;
         private String bookInfo;
-        private JTextArea txaBookInfo;
-        private JButton btnBorrow;
-        private JButton btnReturn;
-        private JButton btnReserve;
-        private JButton btnWaitQueue;
-        private JTextArea txaSystemMessage;
+        private final JTextArea txaBookInfo;
+        private final JButton btnBorrow;
+        private final JButton btnReturn;
+        private final JButton btnReserve;
+        private final JButton btnWaitQueue;
+        private final JTextArea txaSystemMessage;
 
         public BookControlUI(Book passBook, JFrame frame) {
             super(frame, "", true);
@@ -539,41 +510,35 @@ public class AdminUI extends JFrame {
                 @Override
                 public void windowClosed(WindowEvent e) {
                     // TODO it should store modified book into the linked list
+
                 }
 
                 @Override
                 public void windowIconified(WindowEvent e) {
-
                 }
 
                 @Override
                 public void windowDeiconified(WindowEvent e) {
-
                 }
 
                 @Override
                 public void windowActivated(WindowEvent e) {
-
                 }
 
                 @Override
                 public void windowDeactivated(WindowEvent e) {
-
                 }
             });
 
             /* borrow the book*/
-            btnBorrow.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    book.setAvailable(false);
-                    txaBookInfo.setText(operation.returnStrBookInfo(book));
-                    txaSystemMessage.setText("The book is borrowed.");
-                    if (book.isAvailable()) {
-                        setButtonAvailable();
-                    } else {
-                        setButtonNotAvailable();
-                    }
+            btnBorrow.addActionListener(e -> {
+                book.setAvailable(false);
+                txaBookInfo.setText(operation.returnStrBookInfo(book));
+                txaSystemMessage.setText("The book is borrowed.");
+                if (book.isAvailable()) {
+                    setButtonAvailable();
+                } else {
+                    setButtonNotAvailable();
                 }
             });
 
