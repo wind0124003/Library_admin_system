@@ -15,13 +15,13 @@ public class SearchISBNTitle implements Searchable {
     public boolean setFindCondition(String pat1, String pat2, Book book) {
         boolean matchFound = false;
         Pattern pattern = Pattern.compile(pat1);
-        Matcher matcher = pattern.matcher(book.getTitle());
+        Matcher matcher = pattern.matcher(book.getISBN());
         if (matcher.find())
             matchFound = true;
 
         if (matchFound == false) {
             pattern = Pattern.compile(pat2);
-            matcher = pattern.matcher(book.getISBN());
+            matcher = pattern.matcher(book.getTitle());
             if (matcher.find())
                 matchFound = true;
         }

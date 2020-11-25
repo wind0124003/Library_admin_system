@@ -16,9 +16,9 @@ public class AdminOperation implements BookOperation<Book>, UserOperation<Book> 
         MyLinkedList<Book> tempList = list;
         Book book = getBook(ISBN, tempList);
         int index = tempList.indexOf(book);
-        System.out.println(index);
+//        System.out.println(index);
         tempList.remove(index);
-        System.out.println(tempList);
+//        System.out.println(tempList);
         return tempList;
     }
 
@@ -34,7 +34,6 @@ public class AdminOperation implements BookOperation<Book>, UserOperation<Book> 
             Searchable searchTitle = new SearchTitle();
             tempList = searchTitle.search(title, tempList);
         }
-
         return tempList;
     }
 
@@ -55,7 +54,6 @@ public class AdminOperation implements BookOperation<Book>, UserOperation<Book> 
         list.set(index,book);
         return list;
     }
-
 
     public Book getBook(String ISBN, MyLinkedList<Book> list) {
         Book findBook = null;

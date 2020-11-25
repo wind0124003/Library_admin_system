@@ -194,7 +194,7 @@ public class BookControlUI extends JDialog {
         Book book = new Book("C++ How to Program","0131857576",
                 false, queue);
 
-        System.out.println(book.getReservedQueue().toString());
+//        System.out.println(book.getReservedQueue().toString());
 
         BookControlUI frame = new BookControlUI(book, null);
         frame.setTitle(book.getTitle());
